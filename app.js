@@ -1,3 +1,11 @@
+//get API
+const client = contentful.createClient({
+  space: "np5xiu7p1a25",
+  accessToken: "rZ3ZfI6DzVOoGzafNQ5Tw3Z4iFNvP0Z1AMP-0_HPaZ8"
+});
+
+console.log(client);
+
 const cartBtn = document.querySelector(".cart-btn");
 const closeCartBtn = document.querySelector(".close-cart");
 const clearCartBtn = document.querySelector(".clear-cart");
@@ -17,14 +25,25 @@ let buttonsDOM = [];
 class Products {
   async getProducts() {
     try {
-      let result = await fetch("products.json");
-      let data = await result.json();
-      let products = data.items;
-      products = products.map(item => {
-        const { title, price } = item.fields;
-        const { id } = item.sys;
-        const image = item.fields.image.fields.file.url;
+      let contentful = await client.getEntries({
+        content_type: "comfyHouseProduct"
+      });
 
+      console.log(contentful);
+
+      // let result = await fetch("products.json");
+      // let data = await result.json();
+      let products = contentful.items;
+      products = products.map(item => {
+        const {
+          title,
+          price
+        } = item.fields;
+        const {
+          id
+        } = item.sys;
+        let image = item.fields.image.fields.file.url;
+        image = "https:" + image;
         return {
           title,
           price,
@@ -121,6 +140,7 @@ class UI {
   addCartItem(item) {
     const div = document.createElement("div");
     div.classList.add("cart-item");
+    console.log(item.image);
     div.innerHTML = `
      <img src=${item.image} alt="product">
           <div>
@@ -173,6 +193,27 @@ class UI {
         cartContent.removeChild(removeItem.parentElement.parentElement);
 
         this.removeItem(id);
+      } else if (event.target.classList.contains("fa-chevron-up")) {
+        let addAmount = event.target;
+        let id = addAmount.dataset.id;
+        let tempItem = cart.find(item => item.id === id);
+        tempItem.amount = tempItem.amount + 1;
+        Storage.saveCart(cart);
+        this.setCartValues(cart);
+        addAmount.nextElementSibling.innerText = tempItem.amount;
+      } else if (event.target.classList.contains("fa-chevron-down")) {
+        let lowerAmount = event.target;
+        let id = lowerAmount.dataset.id;
+        let tempItem = cart.find(item => item.id === id);
+        tempItem.amount = tempItem.amount - 1;
+        if (tempItem.amount > 0) {
+          Storage.saveCart(cart);
+          this.setCartValues(cart);
+          lowerAmount.previousElementSibling.innerText = tempItem.amount;
+        } else {
+          cartContent.removeChild(lowerAmount.parentElement.parentElement);
+          this.removeItem(id);
+        }
       }
     });
   }
@@ -216,9 +257,8 @@ class Storage {
   }
 
   static getCart() {
-    return localStorage.getItem("cart")
-      ? JSON.parse(localStorage.getItem("cart"))
-      : [];
+    return localStorage.getItem("cart") ?
+      JSON.parse(localStorage.getItem("cart")) : [];
   }
 }
 
