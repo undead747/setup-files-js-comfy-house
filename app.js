@@ -4,17 +4,22 @@ const client = contentful.createClient({
   accessToken: "rZ3ZfI6DzVOoGzafNQ5Tw3Z4iFNvP0Z1AMP-0_HPaZ8"
 });
 
-console.log(client);
-
+const container = document.querySelector(".container-box");
 const cartBtn = document.querySelector(".cart-btn");
 const closeCartBtn = document.querySelector(".close-cart");
 const clearCartBtn = document.querySelector(".clear-cart");
 const cartDOM = document.querySelector(".cart");
 const cartOverlay = document.querySelector(".cart-overlay");
+const cateDOM = document.querySelector(".cate");
+const cateOverlay = document.querySelector(".cate-overlay");
+const cateBtn = document.querySelector(".cate-btn");
 const cartItems = document.querySelector(".cart-items");
 const cartTotal = document.querySelector(".cart-total");
 const cartContent = document.querySelector(".cart-content");
 const productsDOM = document.querySelector(".products-center");
+const gridContainer = document.querySelector(".grid-container");
+const productTitle = document.querySelector(".product-title");
+const priceSelect = document.getElementById("price-select");
 
 //cart
 let cart = [];
@@ -37,7 +42,8 @@ class Products {
       products = products.map(item => {
         const {
           title,
-          price
+          price,
+          type
         } = item.fields;
         const {
           id
@@ -48,7 +54,8 @@ class Products {
           title,
           price,
           id,
-          image
+          image,
+          type
         };
       });
 
@@ -56,6 +63,88 @@ class Products {
     } catch (error) {
       console.log(error);
     }
+  }
+}
+
+class category {
+  displayCategory(products) {
+    let results = "";
+    let categoryList = products.map(item => {
+      return item.type;
+    });
+
+    categoryList = categoryList.filter((value, index, array) => {
+      return array.indexOf(value) === index;
+    });
+
+    categoryList.map(item => {
+      results += `
+               <div class="grid-item cate-item">${item}</div>
+      `;
+    });
+
+    gridContainer.innerHTML = results;
+  }
+
+  cateButton() {
+    cateBtn.addEventListener("click", event => {
+      if (cateOverlay.classList.contains("transparentBcg")) {
+        this.hideCate();
+      } else {
+        this.showCate();
+      }
+    })
+  }
+
+  showCate() {
+    cateOverlay.classList.add("transparentBcg");
+  }
+
+  hideCate() {
+    cateOverlay.classList.remove("transparentBcg");
+  }
+
+  cateClick() {
+    const btns = [...document.querySelectorAll(".cate-item")];
+    const ui = new UI();
+    btns.map(item => {
+      let cateName = item.innerHTML;
+      item.addEventListener("click", event => {
+        let productByCate = Storage.getProductsByCate(cateName);
+        productTitle.innerHTML = cateName;
+        ui.displayProducts(productByCate);
+        this.hideCate();
+      })
+    })
+  }
+}
+
+class Sort {
+
+  selectBoxClick(products) {
+    priceSelect.addEventListener("click", event => {
+      let value = priceSelect.options[priceSelect.selectedIndex].value;
+      if (value === "Lowest") {
+        this.displayByPrice(this.LowestPrice, products);
+      } else if (value === "Highest") {
+        this.displayByPrice(this.HighestPrice, products);
+      }
+    })
+
+  }
+
+  displayByPrice(select, products) {
+    const ui = new UI();
+    products.sort(select);
+    ui.displayProducts(products);
+  };
+
+  LowestPrice(product1, product2) {
+    return product1.price - product2.price;
+  }
+
+  HighestPrice(product1, product2) {
+    return product2.price - product1.price;
   }
 }
 
@@ -158,6 +247,8 @@ class UI {
   }
 
   showCart() {
+    const cate = new category();
+    cate.hideCate();
     cartOverlay.classList.add("transparentBcg");
     cartDOM.classList.add("showCart");
   }
@@ -247,6 +338,20 @@ class Storage {
     localStorage.setItem("products", JSON.stringify(products));
   }
 
+  static getAllProducts() {
+    const products = JSON.parse(localStorage.getItem("products"));
+
+    return products;
+  }
+
+  static getProductsByCate(cate) {
+    const products = JSON.parse(localStorage.getItem("products"));
+
+    return products.filter(item => {
+      return item.type === cate;
+    })
+  }
+
   static getProducts(id) {
     let products = JSON.parse(localStorage.getItem("products"));
     return products.find(product => product.id === id);
@@ -265,19 +370,34 @@ class Storage {
 document.addEventListener("DOMContentLoaded", () => {
   const ui = new UI();
   const products = new Products();
+  const cate = new category();
+  const sort = new Sort();
+
+  container.addEventListener("click", event => {
+
+    if (cateOverlay.classList.contains("transparentBcg")) {
+      cate.hideCate();
+    }
+  });
 
   //set up  app
   ui.setupApp();
+
+  //cate button
+  cate.cateButton();
 
   // get all product
   products
     .getProducts()
     .then(item => {
       ui.displayProducts(item);
+      cate.displayCategory(item);
       Storage.saveproducts(item);
+      sort.selectBoxClick(item);
     })
     .then(() => {
       ui.getBagButtons();
       ui.cartLogic();
+      cate.cateClick();
     });
 });

@@ -21,6 +21,13 @@ body {
     font-family: "Lato", sans-serif;
 }
 
+/* ---------- Select Box -------------------*/
+.price-select-box {
+    margin-left: 350px;
+    width: 7%;
+    margin-bottom: 10px;
+}
+
 /* --------------- Navbar ---------------- */
 .navbar {
     position: sticky;
@@ -66,7 +73,7 @@ body {
 /* --------------- Hero ---------------- */
 .hero {
     min-height: calc(100vh - 60px);
-    background: url("./images/hero-bcg.jpeg") center/cover no-repeat;
+    background: url("./images/header.jpg") center/cover no-repeat;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -187,6 +194,68 @@ body {
 }
 
 /* ---------------End of Products ---------------- */
+/* ---------------Start of Category ---------------- */
+.cate-overlay {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    visibility: hidden;
+}
+
+.cate {
+    position: fixed;
+    top: 63px;
+    left: 350px;
+    width: 100%;
+    height: 25%;
+    z-index: 3;
+    background: rgb(231, 226, 221);
+    padding: 1.5rem;
+}
+
+.transparentBcg {
+    visibility: visible;
+}
+
+@media screen and (min-width: 768px) {
+    .cate {
+        width: 45vw;
+        min-width: 450px;
+    }
+}
+
+.cate-btn {
+    font-size: 1.7rem;
+    cursor: pointer;
+}
+
+
+
+/* ---------------End of Category ---------------- */
+/* --------------- Grid Container ----------------- */
+.grid-container {
+    display: grid;
+    grid-template-columns: auto auto auto;
+
+}
+
+.grid-item {
+    background-color: rgba(255, 255, 255, 0.8);
+    margin: 5px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 20xp;
+}
+
+.grid-item:hover {
+    background-color: #f09d51;
+    color: chocolate;
+}
+
+/* --------------- End Grid Container ------------- */
 /* --------------- Cart ---------------- */
 .cart-overlay {
     position: fixed;
