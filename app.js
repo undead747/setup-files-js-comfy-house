@@ -20,11 +20,14 @@ const productsDOM = document.querySelector(".products-center");
 const gridContainer = document.querySelector(".grid-container");
 const productTitle = document.querySelector(".product-title");
 const priceSelect = document.getElementById("price-select");
+const logo = document.querySelector(".logo");
 
 //cart
 let cart = [];
 // button
 let buttonsDOM = [];
+//products
+let listProducts = [];
 
 //getting the product
 class Products {
@@ -34,20 +37,12 @@ class Products {
         content_type: "comfyHouseProduct"
       });
 
-      console.log(contentful);
-
       // let result = await fetch("products.json");
       // let data = await result.json();
       let products = contentful.items;
       products = products.map(item => {
-        const {
-          title,
-          price,
-          type
-        } = item.fields;
-        const {
-          id
-        } = item.sys;
+        const { title, price, type } = item.fields;
+        const { id } = item.sys;
         let image = item.fields.image.fields.file.url;
         image = "https:" + image;
         return {
@@ -58,6 +53,8 @@ class Products {
           type
         };
       });
+
+      listProducts = products;
 
       return products;
     } catch (error) {
@@ -93,7 +90,7 @@ class category {
       } else {
         this.showCate();
       }
-    })
+    });
   }
 
   showCate() {
@@ -111,33 +108,32 @@ class category {
       let cateName = item.innerHTML;
       item.addEventListener("click", event => {
         let productByCate = Storage.getProductsByCate(cateName);
+        listProducts = productByCate;
         productTitle.innerHTML = cateName;
         ui.displayProducts(productByCate);
         this.hideCate();
-      })
-    })
+      });
+    });
   }
 }
 
 class Sort {
-
-  selectBoxClick(products) {
+  selectBoxClick() {
     priceSelect.addEventListener("click", event => {
       let value = priceSelect.options[priceSelect.selectedIndex].value;
       if (value === "Lowest") {
-        this.displayByPrice(this.LowestPrice, products);
+        this.displayByPrice(this.LowestPrice, listProducts);
       } else if (value === "Highest") {
-        this.displayByPrice(this.HighestPrice, products);
+        this.displayByPrice(this.HighestPrice, listProducts);
       }
-    })
-
+    });
   }
 
   displayByPrice(select, products) {
     const ui = new UI();
     products.sort(select);
     ui.displayProducts(products);
-  };
+  }
 
   LowestPrice(product1, product2) {
     return product1.price - product2.price;
@@ -150,6 +146,12 @@ class Sort {
 
 //display products,cart,etc...
 class UI {
+  bannerClick(products) {
+    logo.addEventListener("click", () => {
+      this.displayProducts(products);
+    });
+  }
+
   displayProducts(products) {
     let result = "";
     products.forEach(product => {
@@ -229,7 +231,6 @@ class UI {
   addCartItem(item) {
     const div = document.createElement("div");
     div.classList.add("cart-item");
-    console.log(item.image);
     div.innerHTML = `
      <img src=${item.image} alt="product">
           <div>
@@ -349,7 +350,7 @@ class Storage {
 
     return products.filter(item => {
       return item.type === cate;
-    })
+    });
   }
 
   static getProducts(id) {
@@ -362,8 +363,9 @@ class Storage {
   }
 
   static getCart() {
-    return localStorage.getItem("cart") ?
-      JSON.parse(localStorage.getItem("cart")) : [];
+    return localStorage.getItem("cart")
+      ? JSON.parse(localStorage.getItem("cart"))
+      : [];
   }
 }
 
@@ -374,7 +376,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const sort = new Sort();
 
   container.addEventListener("click", event => {
-
     if (cateOverlay.classList.contains("transparentBcg")) {
       cate.hideCate();
     }
@@ -390,6 +391,7 @@ document.addEventListener("DOMContentLoaded", () => {
   products
     .getProducts()
     .then(item => {
+      ui.bannerClick(item);
       ui.displayProducts(item);
       cate.displayCategory(item);
       Storage.saveproducts(item);

@@ -21,6 +21,16 @@ body {
     font-family: "Lato", sans-serif;
 }
 
+.banner-text {
+    text-decoration: none !important;
+    color: darkorange !important;
+
+}
+
+.logo {
+    cursor: pointer;
+}
+
 /* ---------- Select Box -------------------*/
 .price-select-box {
     margin-left: 350px;
@@ -98,16 +108,17 @@ body {
     text-transform: uppercase;
     letter-spacing: var(--mainSpacing);
     font-size: 1rem;
-    background: var(--primaryColor);
+    background: brown;
     color: var(--mainBlack);
-    border: 1px solid var(--primaryColor);
+    border: 1px solid brown;
     transition: var(--mainTransition);
     cursor: pointer;
+    border-radius: 3px;
 }
 
 .banner-btn:hover {
     background: transparent;
-    color: var(--primaryColor);
+    color: saddlebrown;
 }
 
 /* --------------- End of Hero ---------------- */
